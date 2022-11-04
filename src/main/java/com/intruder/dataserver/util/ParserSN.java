@@ -16,34 +16,34 @@ import java.util.List;
 
 @Log4j2
 public class ParserSN {
-
-    public static @NotNull List<Record> parse(InputStream inputStream) {
+    //объявляем все переменные
+    private String typeDocument = null;
+    private String addition = null;
+    private Integer numberDocument = null;
+    private String dateDocument = null;
+    private int subItemNumber = 0;
+    private String codeDocument = null;
+    private String nameWorksAndCosts = null;
+    private String costItem = null;
+    private String unit = null;
+    private double countUnits = 0;
+    private double pricePerUnit = 0;
+    private double correctionCoefficient = 0;
+    private double winterCoefficient = 0;
+    private double basicCosts = 0;
+    private double conversionCoefficient = 0;
+    private double totalCostsAtTheCurrentPriceLevel = 0;
+    private double totalCostsForTheWorkName = 0;
+    private double totalBySubChapter = 0;
+    private double totalByChapter = 0;
+    private double total = 0;
+    private double nds = 0;
+    private double finalSum = 0;
+    private double finalSumWithCoefficient= 0;
+    ////////////////////////////////////////////
+    public List<Record> parse(InputStream inputStream) {
         Record record = new Record();
-        //объявляем все переменные
-        String typeDocument = null;
-        String addition = null;
-        Integer numberDocument = null;
-        String dateDocument = null;
-        int subItemNumber = 0;
-        String codeDocument = null;
-        String nameWorksAndCosts = null;
-        String costItem = null;
-        String unit = null;
-        double countUnits = 0;
-        double pricePerUnit = 0;
-        double correctionCoefficient = 0;
-        double winterCoefficient = 0;
-        double basicCosts = 0;
-        double conversionCoefficient = 0;
-        double totalCostsAtTheCurrentPriceLevel = 0;
-        double totalCostsForTheWorkName = 0;
-        double totalBySubChapter = 0;
-        double totalByChapter = 0;
-        double total = 0;
-        double nds = 0;
-        double finalSum = 0;
-        double finalSumWithCoefficient= 0;
-        ////////////////////////////////////////////
+
         //добавляем переменные с номерами столбцов соответствующих значений
         int subItemNumberNum = 0;
         int codeDocumentNum = 0;
@@ -194,23 +194,33 @@ public class ParserSN {
             int difference =0;
             while (iterator.hasNext()) {
                 ///////////////////////////////////////
+
+                log.info("до out");
                 out:
                 {
+                    log.info("после out");
                     Row row = iterator.next();
                     difference = row.getRowNum() - rowIndex;
                     rowIndex = row.getRowNum();
                     log.info("row.getRowNum() = " + row.getRowNum());
                     //Проверяем на начало документа
                     if (!flagList) {
-                        if (row.getCell(0).getStringCellValue().contains("ТСН")) {
-                            flagList = true;
+                        try{
+                            if (row.getCell(0).getStringCellValue().contains("Составлен")) {
+                                flagList = true;
+                            }
+                        }catch (Exception ignored){
+
                         }
                     }
                     //расчитываем сумму затрат по наименованию
-                    if (flagTotalByName && difference > 1) {
+                    log.info("flagTotalByName " + flagTotalByName);
+                    log.info("(difference > 1) " + (difference > 1));
+                    log.info("spisDocForNameWork.size() != 0 " + (spisDocForNameWork.size() != 0));
+                    if (flagTotalByName && (difference > 1) && spisDocForNameWork.size() != 0) {
                         totalCostsForTheWorkName = 0;
                         for (Record spisRecordForNameWork : spisDocForNameWork) {
-                            log.info("флаг расчета затрат по наименованию = " + (flagTotalByName && difference > 1));
+                            log.info("флаг расчета затрат по наименованию = " + true);
                             totalCostsForTheWorkName += spisRecordForNameWork.getTotalCostsAtTheCurrentPriceLevel();
                         }
                         for (Record recordCost : spisDocForNameWork) {
@@ -224,9 +234,11 @@ public class ParserSN {
                         spisDocForNameWork.clear();
                     }
 
+
                     //добавляем новую запись
                     flagTotalByName = false;
-                    if (dateDocument != null && subItemNumber != 0) {
+                    //if (dateDocument != null && subItemNumber != 0) {
+
                         if (record.getCostItem() != null && record.getNameWorksAndCosts().length() != 0) {
                             if (record.getCostItem().contains("ЗП")
                                     || record.getCostItem().contains("МР")
@@ -240,7 +252,7 @@ public class ParserSN {
                                 log.debug("flagTotalByName = " + flagTotalByName);
                             }
                         }
-                    }
+                    //}
 
 
                     //начало парсинга
@@ -260,6 +272,7 @@ public class ParserSN {
                     while (cells.hasNext()) {
                         Cell cell = cells.next();
                         log.info("cell.getColumnIndex() = " + cell.getColumnIndex());
+
                         //парсим данные, относящиеся ко всему листу
                         if (flagParse) {
                             //проверка на пропуск неинформативных строк
@@ -369,6 +382,16 @@ public class ParserSN {
 
                         //парсим записи
                         else {
+                            if (cell.getCellType().equals(CellType.STRING)) {
+                                if (cell.getCellType().equals(CellType.STRING)) {
+                                    try {
+                                        if(cell.getStringCellValue().contains("Итого")){
+                                            return spisDocForChapter;
+                                        }
+                                    } catch (Exception e) {
+                                    }
+                                }
+                            }
                             int index = cell.getColumnIndex();
                             //номер п/п
                             if (index == subItemNumberNum) {
@@ -503,6 +526,7 @@ public class ParserSN {
                             }
                             //всего  в текущем уровне цен
                             if (index == totalCostsAtTheCurrentPriceLevelNum) {
+                                log.info("я тут");
                                 if (cell.getCellType().equals(CellType.NUMERIC)) {
                                     try {
                                         totalCostsAtTheCurrentPriceLevel = cell.getNumericCellValue();
@@ -513,42 +537,47 @@ public class ParserSN {
                                     totalCostsAtTheCurrentPriceLevel = 0;
                                 }
                                 log.info("break out");
-                                break;
+                                if(totalCostsAtTheCurrentPriceLevel != 0) {
+
+                                }
                             }
                         }
                     }
-
-
-                    //создаем новую запись
-                    record.setTypeDocument(typeDocument);
-                    record.setAddition(addition);
-                    record.setNumberDocument(numberDocument);
-                    record.setDateDocument(dateDocument);
-                    record.setCostItem(costItem);
-                    record.setCodeDocument(codeDocument);
-                    record.setSubItemNumber(subItemNumber);
-                    record.setNameWorksAndCosts(nameWorksAndCosts);
-                    record.setUnit(unit);
-                    record.setCountUnits(countUnits);
-                    record.setPricePerUnit(pricePerUnit);
-                    record.setCorrectionCoefficient(correctionCoefficient);
-                    record.setWinterCoefficient(winterCoefficient);
-                    record.setBasicCosts(basicCosts);
-                    record.setConversionCoefficient(conversionCoefficient);
-                    record.setTotalCostsAtTheCurrentPriceLevel(totalCostsAtTheCurrentPriceLevel);
-                    record.setTotalCostsForTheWorkName(totalCostsForTheWorkName);
-                    record.setTotalBySubChapter(totalBySubChapter);
-                    record.setTotalByChapter(totalByChapter);
-                    record.setTotal(total);
-                    record.setNds(nds);
-                    record.setFinalSum(finalSum);
-                    record.setFinalSumWithCoefficient(finalSumWithCoefficient);
-                    //проверяем документ документ
-                    log.info("changeRecord" + record);
-
                 }
+                record = changeRecord(record);
             }
         }
+        log.info(spisDocForChapter.size());
         return spisDocForChapter;
+    }
+
+    private Record changeRecord(Record record){
+        //создаем новую запись
+        if(typeDocument != null) record.setTypeDocument(typeDocument);
+        if(addition != null) record.setAddition(addition);
+        if(numberDocument != null) record.setNumberDocument(numberDocument);
+        if(dateDocument != null) record.setDateDocument(dateDocument);
+        if(costItem != null) record.setCostItem(costItem);
+        if(codeDocument != null) record.setCodeDocument(codeDocument);
+        if(subItemNumber != 0) record.setSubItemNumber(subItemNumber);
+        if(nameWorksAndCosts != null) record.setNameWorksAndCosts(nameWorksAndCosts);
+        if(unit != null) record.setUnit(unit);
+        if(countUnits != 0) record.setCountUnits(countUnits);
+        if(pricePerUnit != 0) record.setPricePerUnit(pricePerUnit);
+        if(correctionCoefficient != 0) record.setCorrectionCoefficient(correctionCoefficient);
+        if(winterCoefficient != 0) record.setWinterCoefficient(winterCoefficient);
+        if(basicCosts != 0) record.setBasicCosts(basicCosts);
+        if(conversionCoefficient != 0) record.setConversionCoefficient(conversionCoefficient);
+        if(totalCostsAtTheCurrentPriceLevel != 0) record.setTotalCostsAtTheCurrentPriceLevel(totalCostsAtTheCurrentPriceLevel);
+        if(totalCostsForTheWorkName != 0) record.setTotalCostsForTheWorkName(totalCostsForTheWorkName);
+        if(totalBySubChapter != 0) record.setTotalBySubChapter(totalBySubChapter);
+        if(totalByChapter != 0) record.setTotalByChapter(totalByChapter);
+        if(total != 0) record.setTotal(total);
+        if(nds != 0) record.setNds(nds);
+        if(finalSum != 0) record.setFinalSum(finalSum);
+        if(finalSumWithCoefficient != 0) record.setFinalSumWithCoefficient(finalSumWithCoefficient);
+        //проверяем документ документ
+        log.info("changeRecord" + record);
+        return record;
     }
 }
