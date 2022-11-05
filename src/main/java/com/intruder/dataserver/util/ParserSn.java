@@ -7,15 +7,15 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 @Log4j2
-public class ParserSN {
+public class ParserSn {
     //объявляем все переменные
     private String typeDocument = null;
     private String addition = null;
@@ -57,12 +57,12 @@ public class ParserSN {
         int conversionCoefficientNum = 0;
         int totalCostsAtTheCurrentPriceLevelNum = 0;
         /////
-        log.info("создаем список записей по наименованию работ");
+        log.debug("создаем список записей по наименованию работ");
         //создаем список записей по наименованию работ
         List<Record> spisDocForNameWork = new ArrayList<>();
         //создаем общий список работ по разделу
         List<Record> spisDocForChapter = new ArrayList<>();
-        log.info("получаем xssfWorkbook");
+        log.debug("получаем xssfWorkbook");
         XSSFWorkbook workBook = null;
         try {
             workBook = new XSSFWorkbook(inputStream);
@@ -194,15 +194,12 @@ public class ParserSN {
             int difference =0;
             while (iterator.hasNext()) {
                 ///////////////////////////////////////
-
-                log.info("до out");
                 out:
                 {
-                    log.info("после out");
                     Row row = iterator.next();
                     difference = row.getRowNum() - rowIndex;
                     rowIndex = row.getRowNum();
-                    log.info("row.getRowNum() = " + row.getRowNum());
+                    log.debug("row.getRowNum() = " + row.getRowNum());
                     //Проверяем на начало документа
                     if (!flagList) {
                         try{
@@ -214,13 +211,13 @@ public class ParserSN {
                         }
                     }
                     //расчитываем сумму затрат по наименованию
-                    log.info("flagTotalByName " + flagTotalByName);
-                    log.info("(difference > 1) " + (difference > 1));
-                    log.info("spisDocForNameWork.size() != 0 " + (spisDocForNameWork.size() != 0));
+                    log.debug("flagTotalByName " + flagTotalByName);
+                    log.debug("(difference > 1) " + (difference > 1));
+                    log.debug("spisDocForNameWork.size() != 0 " + (spisDocForNameWork.size() != 0));
                     if (flagTotalByName && (difference > 1) && spisDocForNameWork.size() != 0) {
                         totalCostsForTheWorkName = 0;
                         for (Record spisRecordForNameWork : spisDocForNameWork) {
-                            log.info("флаг расчета затрат по наименованию = " + true);
+                            log.debug("флаг расчета затрат по наименованию = " + true);
                             totalCostsForTheWorkName += spisRecordForNameWork.getTotalCostsAtTheCurrentPriceLevel();
                         }
                         for (Record recordCost : spisDocForNameWork) {
@@ -228,8 +225,8 @@ public class ParserSN {
                             spisDocForChapter.add(recordCost);
                             log.info("controlRecordCost = " + recordCost);
                         }
-                        log.info("spisDocForChapter.size() = " + spisDocForChapter.size());
-                        log.info("spisDocForNameWork.size() = " + spisDocForNameWork.size());
+                        log.debug("spisDocForChapter.size() = " + spisDocForChapter.size());
+                        log.debug("spisDocForNameWork.size() = " + spisDocForNameWork.size());
 
                         spisDocForNameWork.clear();
                     }
@@ -271,24 +268,24 @@ public class ParserSN {
                     Iterator<Cell> cells = row.cellIterator();
                     while (cells.hasNext()) {
                         Cell cell = cells.next();
-                        log.info("cell.getColumnIndex() = " + cell.getColumnIndex());
+                        log.debug("cell.getColumnIndex() = " + cell.getColumnIndex());
 
                         //парсим данные, относящиеся ко всему листу
                         if (flagParse) {
                             //проверка на пропуск неинформативных строк
                             if (cell.getCellType().equals(CellType.STRING)) {
-                                log.info("Тип ячейки String");
+                                log.debug("Тип ячейки String");
                                 if (cell.getStringCellValue() != null) {
                                     if (cell.getStringCellValue().contains("Раздел")) {
                                         flagParse = false;
-                                        log.info("flagParse после проверки на пропуск неинформативных строк = " + flagParse);
+                                        log.debug("flagParse после проверки на пропуск неинформативных строк = " + flagParse);
                                         flagParseDoc++;
                                         break out;
                                     }
                                 }
                                 //////////////////////////////////////////
                                 if (cell.getStringCellValue() != null) {
-                                    log.info("cell.getStringCellValue() " + cell.getStringCellValue() + " num = " + cell.getColumnIndex());
+                                    log.debug("cell.getStringCellValue() " + cell.getStringCellValue() + " num = " + cell.getColumnIndex());
                                     infoCell.setLength(0);
                                     if (cell.getStringCellValue().contains("ТСН")) {
                                         String info = infoCell.append(cell.getStringCellValue()).toString();
@@ -312,69 +309,69 @@ public class ParserSN {
                                     ///парсим номера столбцов
                                     if (cell.getStringCellValue().contains("пп")) {
                                         subItemNumberNum = cell.getColumnIndex();
-                                        log.info("subItemNumberNum = " + subItemNumberNum);
+                                        log.debug("subItemNumberNum = " + subItemNumberNum);
                                         continue;
                                     }
                                     if (cell.getStringCellValue().contains("Шифр")) {
                                         codeDocumentNum = cell.getColumnIndex();
-                                        log.info("codeDocumentNum = " + codeDocumentNum);
+                                        log.debug("codeDocumentNum = " + codeDocumentNum);
                                         continue;
                                     }
                                     if (cell.getStringCellValue().contains("Наименование")) {
                                         nameWorksAndCostsNum = cell.getColumnIndex();
-                                        log.info("nameWorksAndCostsNum = " + nameWorksAndCostsNum);
+                                        log.debug("nameWorksAndCostsNum = " + nameWorksAndCostsNum);
                                         continue;
                                     }
                                     if (cell.getStringCellValue().contains("Ед.")) {
                                         unitNum = cell.getColumnIndex();
-                                        log.info("unitNum = " + unitNum);
+                                        log.debug("unitNum = " + unitNum);
                                         continue;
                                     }
                                     if (cell.getStringCellValue().contains("Кол-во")) {
                                         countUnitsNum = cell.getColumnIndex();
-                                        log.info("countUnitsNum = " + countUnitsNum);
+                                        log.debug("countUnitsNum = " + countUnitsNum);
                                         continue;
                                     }
                                     if (cell.getStringCellValue().contains("Цена")) {
                                         pricePerUnitNum = cell.getColumnIndex();
-                                        log.info("pricePerUnitNum = " + pricePerUnitNum);
+                                        log.debug("pricePerUnitNum = " + pricePerUnitNum);
                                         continue;
                                     }
                                     if (cell.getStringCellValue().contains("Поправочные")) {
                                         correctionCoefficientNum = cell.getColumnIndex();
-                                        log.info("correctionCoefficientNum = " + correctionCoefficientNum);
+                                        log.debug("correctionCoefficientNum = " + correctionCoefficientNum);
                                         continue;
                                     }
                                     if (cell.getStringCellValue().contains("зимних")) {
                                         winterCoefficientNum = cell.getColumnIndex();
-                                        log.info("winterCoefficientNum = " + winterCoefficientNum);
+                                        log.debug("winterCoefficientNum = " + winterCoefficientNum);
                                         continue;
                                     }
                                     if (cell.getStringCellValue().contains("базисном")) {
                                         basicCostsNum = cell.getColumnIndex();
-                                        log.info("basicCostsNum = " + basicCostsNum);
+                                        log.debug("basicCostsNum = " + basicCostsNum);
                                         continue;
                                     }
                                     if (cell.getStringCellValue().contains("пересчета")) {
                                         conversionCoefficientNum = cell.getColumnIndex();
-                                        log.info("conversionCoefficientNum = " + conversionCoefficientNum);
+                                        log.debug("conversionCoefficientNum = " + conversionCoefficientNum);
                                         continue;
                                     }
                                     if (cell.getStringCellValue().contains("текущем") || cell.getStringCellValue().contains("ВСЕГО")) {
                                         totalCostsAtTheCurrentPriceLevelNum = cell.getColumnIndex();
-                                        log.info("totalCostsAtTheCurrentPriceLevelNum = " + totalCostsAtTheCurrentPriceLevelNum);
+                                        log.debug("totalCostsAtTheCurrentPriceLevelNum = " + totalCostsAtTheCurrentPriceLevelNum);
                                         continue;
                                     }else {
-                                        log.info("break in columnName");
+                                        log.debug("break in columnName");
                                         break out;
                                     }
                                 }
                             } else {
                                 if(cell.getColumnIndex() == row.getRowNum()){
-                                    log.info("break in parse row");
+                                    log.debug("break in parse row");
                                     break out;
                                 }else {
-                                    log.info("continue in parse row");
+                                    log.debug("continue in parse row");
                                     continue;
                                 }
                             }
@@ -399,10 +396,8 @@ public class ParserSN {
                                     try {
                                         subItemNumber = Integer.parseInt(cell.getStringCellValue());
 
-                                        log.info("subItemNumber = {}", subItemNumber);
+                                        log.debug("subItemNumber = {}", subItemNumber);
                                     } catch (Exception e) {
-
-                                        log.info("subItemNumberError = {}", subItemNumber);
                                     }
                                 }
                             }
@@ -410,14 +405,14 @@ public class ParserSN {
                             if (index == codeDocumentNum) {
                                 if (cell.getCellType().equals(CellType.STRING)) {
                                     codeDocument = cell.getStringCellValue();
-                                    log.info("codeDocument = {}", codeDocument);
+                                    log.debug("codeDocument = {}", codeDocument);
                                 }
                             }
                             //наименование работ или статьи затрат
                             if (index == nameWorksAndCostsNum) {
                                 try {
                                     if (cell.getStringCellValue() != null) {
-                                        log.info("nameWorksAndCosts = " + cell.getStringCellValue());
+                                        log.debug("nameWorksAndCosts = " + cell.getStringCellValue());
                                         if (cell.getStringCellValue().contains("разделу") || cell.getStringCellValue().contains("подразделу")) {
                                             break parseFile;
                                         }
@@ -428,11 +423,11 @@ public class ParserSN {
                                                 || cell.getStringCellValue().contains("ЗПМ")
                                                 || cell.getStringCellValue().contains("ЗТР")) {
                                             costItem = cell.getStringCellValue();
-                                            log.info("costItem = {}", costItem);
+                                            log.debug("costItem = {}", costItem);
                                         } else {
                                             nameWorksAndCosts = cell.getStringCellValue();
                                             costItem = null;
-                                            log.info("nameWorksAndCosts = {}", nameWorksAndCosts);
+                                            log.debug("nameWorksAndCosts = {}", nameWorksAndCosts);
                                         }
                                     }
                                 } catch (Exception ignored) {
@@ -446,7 +441,7 @@ public class ParserSN {
                                             unit = cell.getStringCellValue();
                                     } catch (Exception ignored) {
                                     }
-                                    log.info("unit = {}", unit);
+                                    log.debug("unit = {}", unit);
                                 }
                             }
                             //количество
@@ -456,7 +451,7 @@ public class ParserSN {
                                         countUnits = cell.getNumericCellValue();
                                     } catch (Exception ignored) {
                                     }
-                                    log.info("countUnits = {}", countUnits);
+                                    log.debug("countUnits = {}", countUnits);
                                 }
                             }
                             //цена за единицу
@@ -467,7 +462,7 @@ public class ParserSN {
                                     } catch (Exception ignored) {
 
                                     }
-                                    log.info("pricePerUnit = {}", pricePerUnit);
+                                    log.debug("pricePerUnit = {}", pricePerUnit);
                                 } else {
                                     pricePerUnit = 0;
                                 }
@@ -480,7 +475,7 @@ public class ParserSN {
                                     } catch (Exception ignored) {
 
                                     }
-                                    log.info("correctionCoefficient = {}", correctionCoefficient);
+                                    log.debug("correctionCoefficient = {}", correctionCoefficient);
                                 } else {
                                     correctionCoefficient = 0;
                                 }
@@ -493,7 +488,7 @@ public class ParserSN {
                                     } catch (Exception ignored) {
 
                                     }
-                                    log.info("winterCoefficient = {}", winterCoefficient);
+                                    log.debug("winterCoefficient = {}", winterCoefficient);
                                 } else {
                                     winterCoefficient = 0;
                                 }
@@ -506,7 +501,7 @@ public class ParserSN {
                                     } catch (Exception ignored) {
 
                                     }
-                                    log.info("basicCosts = {}", basicCosts);
+                                    log.debug("basicCosts = {}", basicCosts);
                                 }else {
                                     basicCosts = 0;
                                 }
@@ -519,26 +514,21 @@ public class ParserSN {
                                     } catch (Exception ignored) {
 
                                     }
-                                    log.info("conversionCoefficient = {}", conversionCoefficient);
+                                    log.debug("conversionCoefficient = {}", conversionCoefficient);
                                 }else{
                                     conversionCoefficient = 0;
                                 }
                             }
                             //всего  в текущем уровне цен
                             if (index == totalCostsAtTheCurrentPriceLevelNum) {
-                                log.info("я тут");
                                 if (cell.getCellType().equals(CellType.NUMERIC)) {
                                     try {
                                         totalCostsAtTheCurrentPriceLevel = cell.getNumericCellValue();
                                     } catch (Exception ignored) {
                                     }
-                                    log.info("totalCostsAtTheCurrentPriceLevel = {}", totalCostsAtTheCurrentPriceLevel);
+                                    log.debug("totalCostsAtTheCurrentPriceLevel = {}", totalCostsAtTheCurrentPriceLevel);
                                 }else{
                                     totalCostsAtTheCurrentPriceLevel = 0;
-                                }
-                                log.info("break out");
-                                if(totalCostsAtTheCurrentPriceLevel != 0) {
-
                                 }
                             }
                         }
@@ -556,7 +546,7 @@ public class ParserSN {
         if(typeDocument != null) record.setTypeDocument(typeDocument);
         if(addition != null) record.setAddition(addition);
         if(numberDocument != null) record.setNumberDocument(numberDocument);
-        if(dateDocument != null) record.setDateDocument(dateDocument);
+        if(dateDocument != null) record.setDateDocument(LocalDate.parse(dateDocument));
         if(costItem != null) record.setCostItem(costItem);
         if(codeDocument != null) record.setCodeDocument(codeDocument);
         if(subItemNumber != 0) record.setSubItemNumber(subItemNumber);
@@ -577,7 +567,7 @@ public class ParserSN {
         if(finalSum != 0) record.setFinalSum(finalSum);
         if(finalSumWithCoefficient != 0) record.setFinalSumWithCoefficient(finalSumWithCoefficient);
         //проверяем документ документ
-        log.info("changeRecord" + record);
+        log.debug("changeRecord" + record);
         return record;
     }
 }

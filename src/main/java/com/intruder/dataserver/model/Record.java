@@ -1,19 +1,37 @@
 package com.intruder.dataserver.model;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.Hibernate;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
-@Table(name = "tsn_directory_tsndirectorymodel")
+@Table(name = "references_referencesmodel")
 @Getter
 @Setter
 @ToString
+@RequiredArgsConstructor
 public class Record {
 
+    /**
+     * ID записи
+     */
     @Id
     @Column
     private Long id;
+    /**
+     * ID документа
+     */
+    @Column
+    private int documentId;
     /**
      * № п/п
      */
@@ -43,17 +61,13 @@ public class Record {
      * период сборника коэффициентов
      */
     @Column
-    private String dateDocument;
+    private LocalDate dateDocument;
     /**
-     * раздел
+     * ID СПГЗ
      */
     @Column
-    private String chapter;
-    /**
-     * подразел
-     */
-    @Column
-    private String subChapter;
+    private int idSubChapter;
+
     /**
      * наименование работ и затрат
      */
@@ -139,4 +153,17 @@ public class Record {
      */
     @Column
     private double finalSumWithCoefficient;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Record record = (Record) o;
+        return id != null && Objects.equals(id, record.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
