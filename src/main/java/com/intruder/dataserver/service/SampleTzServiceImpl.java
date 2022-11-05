@@ -5,6 +5,8 @@ import com.intruder.dataserver.repository.SampleTzRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SampleTzServiceImpl implements SampleTzService {
 
@@ -18,5 +20,10 @@ public class SampleTzServiceImpl implements SampleTzService {
     @Override
     public void create(SampleTz sampleTZ) {
         sampleTzRepository.save(sampleTZ);
+    }
+
+    @Override
+    public void saveAll(List<SampleTz> sampleTzList) {
+        sampleTzRepository.saveAllAndFlush(sampleTzList);
     }
 }

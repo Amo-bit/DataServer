@@ -6,10 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
@@ -24,12 +21,13 @@ public class SampleTz {
      * ID шаблона тз
      */
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private Long id;
     /**
      * Наименование шаблона
      */
-    @Column
+    @Column(name = "name")
     private String nameTz;
     /**
      * КПГЗ

@@ -56,7 +56,7 @@ public class SampleTzController {
         FileInputStream inputStream = null;
         try {
             log.info("читаем поток");
-            inputStream = new FileInputStream("C:\\SN\\tz1.xlsx");
+            inputStream = new FileInputStream("C:\\SN\\tz.xlsx");
 
             System.out.println(inputStream);
         } catch (FileNotFoundException e) {
@@ -68,10 +68,11 @@ public class SampleTzController {
 
         list = parser.parse(inputStream);
         //System.out.println("list " + list);
-        for (SampleTz sampleTz : list){
-            System.out.println(sampleTz);
-            //recordService.create(record);
-        }
+        sampleTzService.saveAll(list);
+        /*for (SampleTz sampleTz : list){
+            //System.out.println(sampleTz);
+            sampleTzService.create(sampleTz);
+        }*/
 
         long finish = System.currentTimeMillis();
         long elapsed = finish - start;
