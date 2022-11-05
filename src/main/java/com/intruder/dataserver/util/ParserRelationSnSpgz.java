@@ -1,5 +1,6 @@
 package com.intruder.dataserver.util;
 
+import com.intruder.dataserver.model.RelationSnSpgz;
 import com.intruder.dataserver.model.SampleTz;
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.ss.usermodel.Cell;
@@ -8,32 +9,31 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 @Log4j2
-public class ParserTz {
+public class ParserRelationSnSpgz {
     //объявляем все переменные
-    private String nameTz = null;
-    private String kpgz = null;
-    private long idSpgz = 0;
+    private String codeWork = null;
+    private String nameWork = null;
     private String spgz = null;
 
     ////////////////////////////////////////////
-    public List<SampleTz> parse(InputStream inputStream) {
-        SampleTz sampleTz = new SampleTz();
+    public List<RelationSnSpgz> parse(InputStream inputStream) {
+        RelationSnSpgz relationSnSpgz = new RelationSnSpgz();
 
         //добавляем переменные с номерами столбцов соответствующих значений
-        int nameNum = 0;
-        int kpgzNum = 0;
-        int idSpgzNum = 0;
+        int codeWorkNum = 0;
+        int nameWorkNum = 0;
         int spgzNum = 0;
         /////
-        log.debug("создаем список шаблонов");
-        //создаем список шаблонов
-        List<SampleTz> spisSampleTz = new ArrayList<>();
+        log.debug("создаем список соотношений");
+        //создаем список соотношений
+        List<RelationSnSpgz> spisRelationSnSpgz = new ArrayList<>();
         //получаем файл xlsx
         log.debug("получаем xssfWorkbook");
         XSSFWorkbook workBook = null;
@@ -51,7 +51,7 @@ public class ParserTz {
         Sheet sheet = workBook.getSheetAt(0);
         Iterator<Row> iterator = sheet.iterator();
 
-        log.info("начало парсинга шаблонов ТЗ");
+        log.info("начало парсинга соотношений");
         while (iterator.hasNext()) {
 
             out:{
@@ -60,8 +60,8 @@ public class ParserTz {
 
                 //начало парсинга
                 //создаем новый документ
-                sampleTz = new SampleTz();
-                log.debug("создаем новый документ = " + sampleTz);
+                relationSnSpgz = new RelationSnSpgz();
+                log.debug("создаем новое соотношение = " + relationSnSpgz);
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 //проходим по ячейкам строки
@@ -72,7 +72,7 @@ public class ParserTz {
 
                     //парсим данные, относящиеся ко всему листу
                     if (spgzNum == 0) {
-                        //проверка на пропуск неинформативных строк
+
                         if (cell.getCellType().equals(CellType.STRING)) {
                             log.debug("Тип ячейки String");
 
@@ -81,19 +81,14 @@ public class ParserTz {
                                 log.debug("cell.getStringCellValue() " + cell.getStringCellValue() + " num = " + cell.getColumnIndex());
 
                                 ///парсим номера столбцов
-                                if (cell.getStringCellValue().contains("ТЗ")) {
-                                    nameNum = cell.getColumnIndex();
-                                    log.debug("nameNum = " + nameNum);
+                                if (cell.getStringCellValue().contains("Шифр")) {
+                                    codeWorkNum = cell.getColumnIndex();
+                                    log.debug("codeWorkNum = " + codeWorkNum);
                                     continue;
                                 }
-                                if (cell.getStringCellValue().contains("КПГЗ")) {
-                                    kpgzNum= cell.getColumnIndex();
-                                    log.debug("kpgzNum = " + kpgzNum);
-                                    continue;
-                                }
-                                if (cell.getStringCellValue().contains("ID")) {
-                                    idSpgzNum = cell.getColumnIndex();
-                                    log.debug("idSpgzNum= " + idSpgzNum);
+                                if (cell.getStringCellValue().contains("работ")) {
+                                    nameWorkNum = cell.getColumnIndex();
+                                    log.debug("nameWorkNum = " + nameWorkNum);
                                     continue;
                                 }
                                 if (cell.getStringCellValue().contains("СПГЗ")) {
@@ -102,7 +97,7 @@ public class ParserTz {
                                     continue;
                                 }else {
                                     log.debug("break in columnName");
-                                    break out;
+                                    continue;
                                 }
                             }
                         } else {
@@ -116,37 +111,27 @@ public class ParserTz {
                         }
                     }
 
-                    //парсим записи
+                    //парсим соотношения
                     else {
 
                         int index = cell.getColumnIndex();
-                        //наименование шаблона ТЗ
-                        if (index == nameNum) {
+                        //шифр работ
+                        if (index == codeWorkNum) {
                             if (cell.getCellType().equals(CellType.STRING)) {
                                 try {
-                                    if(!cell.getStringCellValue().isEmpty()) nameTz = cell.getStringCellValue();
-                                    log.debug("name = {}", nameTz);
+                                    codeWork = cell.getStringCellValue();
+                                    log.debug("codeWork = {}", codeWork);
                                 } catch (Exception ignored) {
                                 }
                             }
                         }
-                        //КПГЗ
-                        if (index == kpgzNum) {
+                        //наименование работ
+                        if (index == nameWorkNum) {
                             if (cell.getCellType().equals(CellType.STRING)) {
                                 try{
-                                    kpgz = cell.getStringCellValue();
-                                    log.debug("kpgz = {}", kpgz);
+                                    nameWork = cell.getStringCellValue();
+                                    log.debug("nameWork  = {}", nameWork);
                                 }catch (Exception ignored) {
-                                }
-                            }
-                        }
-                        //ID СПГЗ
-                        if (index == idSpgzNum) {
-                            if (cell.getCellType().equals(CellType.STRING)) {
-                                try {
-                                    idSpgz = Integer.parseInt(cell.getStringCellValue());
-                                    log.debug("idSpgz = {}", idSpgz);
-                                } catch (Exception ignored) {
                                 }
                             }
                         }
@@ -163,26 +148,24 @@ public class ParserTz {
                     }
                 }
             }
-            sampleTz = changeSampleTz(sampleTz);
+            relationSnSpgz = changeRelationSnSpgz(relationSnSpgz);
             //добавляем новую запись
-            if (sampleTz.getIdSpgz() != 0) {
-                log.info("Новая запись добавлена = " + sampleTz);
-                spisSampleTz.add(sampleTz);
+            if (relationSnSpgz.getCodeWork() != null) {
+                log.info("Новое соотношение добавлено = " + relationSnSpgz);
+                spisRelationSnSpgz.add(relationSnSpgz);
             }
-
         }
-        log.info(spisSampleTz.size());
-        return spisSampleTz;
+        log.info(spisRelationSnSpgz.size());
+        return spisRelationSnSpgz;
     }
 
-    private SampleTz changeSampleTz(SampleTz sampleTz){
+    private RelationSnSpgz changeRelationSnSpgz(RelationSnSpgz relationSnSpgz){
         //создаем новую запись
-        if(nameTz != null) sampleTz.setNameTz(nameTz);
-        if(kpgz != null) sampleTz.setKpgz(kpgz);
-        if(idSpgz != 0) sampleTz.setIdSpgz(idSpgz);
-        if(spgz != null) sampleTz.setSpgz(spgz);
+        if(codeWork != null) relationSnSpgz.setCodeWork(codeWork);
+        if(nameWork != null) relationSnSpgz.setNameWork(nameWork);
+        if(spgz != null) relationSnSpgz.setSpgz(spgz);
         //проверяем шаблон
-        log.debug("changeRecord" + sampleTz);
-        return sampleTz;
+        log.debug("changeRecord" + relationSnSpgz);
+        return relationSnSpgz;
     }
 }

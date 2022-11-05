@@ -1,7 +1,8 @@
 package com.intruder.dataserver.controller;
 
-import com.intruder.dataserver.model.RecordSpgz;
-import com.intruder.dataserver.service.RecordSpgzService;
+import com.intruder.dataserver.model.RelationSnSpgz;
+import com.intruder.dataserver.service.RelationSnSpgzService;
+import com.intruder.dataserver.util.ParserRelationSnSpgz;
 import com.intruder.dataserver.util.ParserSn;
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.util.IOUtils;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -24,20 +24,20 @@ import java.util.List;
 @RestController
 @RequestMapping("/spgz")
 @Log4j2
-public class RecordSpgzController {
+public class RelationSnSpgzController {
 
-    private final RecordSpgzService recordSpgzService;
-    private ParserSn parser = new ParserSn();
+    private final RelationSnSpgzService relationSnSpgzService;
+    private ParserRelationSnSpgz parser = new ParserRelationSnSpgz();
 
     @Autowired
-    public RecordSpgzController(RecordSpgzService recordSpgzService) {
-        this.recordSpgzService = recordSpgzService;
+    public RelationSnSpgzController(RelationSnSpgzService relationSnSpgzService) {
+        this.relationSnSpgzService = relationSnSpgzService;
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/")
     public ResponseEntity<Object> acceptData(HttpServletRequest requestEntity) throws Exception {
         byte[] processedText = IOUtils.toByteArray(requestEntity.getInputStream());
-        List<RecordSpgz> list = new ArrayList<>();
+        List<RelationSnSpgz> list = new ArrayList<>();
         log.info(processedText.length);
         /*list = parser.parse(new ByteArrayInputStream(processedText));
         for (RecordSpgz recordSpgz : list){
@@ -50,12 +50,12 @@ public class RecordSpgzController {
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
     @GetMapping(value = "/")
-    public ResponseEntity<List<RecordSpgz>> create() {
+    public ResponseEntity<List<RelationSnSpgz>> create() {
         //long start = System.currentTimeMillis();
         FileInputStream inputStream = null;
         try {
             log.info("читаем поток");
-            inputStream = new FileInputStream("C:\\SN\\ул. Трофимова д.26_-1 (4) (1).xlsx");
+            inputStream = new FileInputStream("C:\\SN\\ТСН-2001 С СПГЗ.xlsx");
 
             System.out.println(inputStream);
         } catch (FileNotFoundException e) {
@@ -63,14 +63,9 @@ public class RecordSpgzController {
             throw new RuntimeException(e);
         }
         log.info("поток прочтен");
-        List<RecordSpgz> list = new ArrayList<>();
-
-        /*list = parser.parse(inputStream);
-        //System.out.println("list " + list);
-        for (RecordSpgz recordSpgz : list){
-            System.out.println(recordSpgz);
-            //recordService.create(record);
-        }*/
+        List<RelationSnSpgz> list = new ArrayList<>();
+        list = parser.parse(inputStream);
+        relationSnSpgzService.saveAll(list);
 
         //long finish = System.currentTimeMillis();
         //long elapsed = finish - start;

@@ -6,14 +6,14 @@ import java.util.List;
 
 public interface SampleTzService {
     /**
-     * Создает новый шаблон
-     * @param sampleTZ- шаблон для создания
+     * Создает отношение
+     * @param sampleTZ- отношение для создания
      */
     void create(SampleTz sampleTZ);
 
     /**
-     * Создает новый список шаблонов
-     * @param sampleTzList- список шаблонов для сохранения
+     * Создает новый список отношений
+     * @param sampleTzList- список отношений для сохранения
      */
     void saveAll(List<SampleTz> sampleTzList);
 }

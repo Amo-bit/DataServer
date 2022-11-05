@@ -4,42 +4,45 @@ package com.intruder.dataserver.model;
 import lombok.*;
 import org.hibernate.Hibernate;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "references_spgzmodel")
+@Table(name = "references_conformitymodel")
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class RecordSpgz {
+public class RelationSnSpgz {
 
     /**
-     * ID СПГЗ
+     * Id
      */
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private Long id;
+    /**
+     * Шифр работы
+     */
+    @Column
+    private String codeWork;
+    /**
+     * Наименование работы
+     */
+    @Column
+    private String nameWork;
     /**
      * СПГЗ
      */
     @Column
     private String spgz;
-    /**
-     * КПГЗ
-     */
-    @Column
-    private String kpgz;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        RecordSpgz that = (RecordSpgz) o;
+        RelationSnSpgz that = (RelationSnSpgz) o;
         return id != null && Objects.equals(id, that.id);
     }
 
