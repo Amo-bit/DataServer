@@ -1,10 +1,9 @@
 package com.intruder.dataserver.repository;
 
-import com.intruder.dataserver.model.SampleTz;
+import com.intruder.dataserver.model.RecordSn;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SampleTzRepository extends JpaRepository<SampleTz, Integer> {
-    SampleTz findAllByIdSpgz(long idSpgz);
+public interface RecordSnRepository extends JpaRepository<RecordSn, Integer> {
 }

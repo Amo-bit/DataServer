@@ -6,10 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -19,12 +16,13 @@ import java.util.Objects;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class Record {
+public class RecordSn {
 
     /**
      * ID записи
      */
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private Long id;
     /**
@@ -61,7 +59,7 @@ public class Record {
      * период сборника коэффициентов
      */
     @Column
-    private LocalDate dateDocument;
+    private String dateDocument;
     /**
      * ID СПГЗ
      */
@@ -158,7 +156,7 @@ public class Record {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Record record = (Record) o;
+        RecordSn record = (RecordSn) o;
         return id != null && Objects.equals(id, record.id);
     }
 

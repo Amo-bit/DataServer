@@ -1,9 +1,11 @@
 package com.intruder.dataserver.repository;
 
-import com.intruder.dataserver.model.Record;
+import com.intruder.dataserver.model.RelationKeyWord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
-public interface RecordRepository extends JpaRepository<Record, Integer> {
+public interface RelationKeyWordRepository extends JpaRepository<RelationKeyWord, Integer> {
 }

@@ -1,7 +1,6 @@
 package com.intruder.dataserver.service;
 
 import com.intruder.dataserver.model.RelationSnSpgz;
-import com.intruder.dataserver.model.SampleTz;
 
 import java.util.List;
 
@@ -17,4 +16,23 @@ public interface RelationSnSpgzService {
      * @param relationSnSPGZList- список шаблонов для сохранения
      */
     void saveAll(List<RelationSnSpgz> relationSnSPGZList);
+
+    /**
+     * Поиск соотношения по шифру работ
+     * @param codeWork - шифр работ для поиска
+     */
+    RelationSnSpgz findAllByCodeWork(String codeWork);
+
+    /**
+     * Поиск соотношения по наименованию работ
+     * @param nameWork - шифр работ для поиска
+     */
+    List<RelationSnSpgz> findALLByNameWorkContains(String nameWork);
+
+    /**
+     * Поиск id СПГЗ по шифру работ
+     * @param codeWork - шифр работ для поиска
+     * @return
+     */
+    int findIdSpgzByCodeWork(String codeWork);
 }

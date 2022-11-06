@@ -3,7 +3,6 @@ package com.intruder.dataserver.controller;
 import com.intruder.dataserver.model.RelationSnSpgz;
 import com.intruder.dataserver.service.RelationSnSpgzService;
 import com.intruder.dataserver.util.ParserRelationSnSpgz;
-import com.intruder.dataserver.util.ParserSn;
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +54,7 @@ public class RelationSnSpgzController {
         FileInputStream inputStream = null;
         try {
             log.info("читаем поток");
-            inputStream = new FileInputStream("C:\\SN\\ТСН-2001 С СПГЗ.xlsx");
+            inputStream = new FileInputStream("C:\\SN\\СН-2012 с СПГЗ.xlsx");
 
             System.out.println(inputStream);
         } catch (FileNotFoundException e) {

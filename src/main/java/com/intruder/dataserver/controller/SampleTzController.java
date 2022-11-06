@@ -1,6 +1,6 @@
 package com.intruder.dataserver.controller;
 
-import com.intruder.dataserver.model.Record;
+import com.intruder.dataserver.model.RecordSn;
 import com.intruder.dataserver.model.SampleTz;
 import com.intruder.dataserver.service.SampleTzService;
 import com.intruder.dataserver.util.ParserTz;
@@ -51,7 +51,7 @@ public class SampleTzController {
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
     @GetMapping(value = "/")
-    public ResponseEntity<List<Record>> create() {
+    public ResponseEntity<List<RecordSn>> create() {
         long start = System.currentTimeMillis();
         FileInputStream inputStream = null;
         try {

@@ -1,6 +1,6 @@
 package com.intruder.dataserver.util;
 
-import com.intruder.dataserver.model.RelationSnSpgz;
+import com.intruder.dataserver.model.RelationKeyWord;
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -15,26 +15,22 @@ import java.util.Iterator;
 import java.util.List;
 
 @Log4j2
-public class ParserRelationSnSpgz {
+public class ParserRelationKeyWord {
     //объявляем все переменные
-    private String codeWork = null;
-    private String nameWork = null;
+    private String keyWord = null;
     private String spgz = null;
-    private long idSpgz = 0;
 
     ////////////////////////////////////////////
-    public List<RelationSnSpgz> parse(InputStream inputStream) {
-        RelationSnSpgz relationSnSpgz = new RelationSnSpgz();
+    public List<RelationKeyWord> parse(InputStream inputStream) {
+        RelationKeyWord relationKeyWord = new RelationKeyWord();
 
         //добавляем переменные с номерами столбцов соответствующих значений
-        int codeWorkNum = 0;
-        int nameWorkNum = 0;
+        int keyWordNum = 0;
         int spgzNum = 0;
-        int idSpgzNum = 0;
         /////
         log.debug("создаем список соотношений");
         //создаем список соотношений
-        List<RelationSnSpgz> spisRelationSnSpgz = new ArrayList<>();
+        List<RelationKeyWord> spisRelationKeyWord = new ArrayList<>();
         //получаем файл xlsx
         log.debug("получаем xssfWorkbook");
         XSSFWorkbook workBook = null;
@@ -61,8 +57,8 @@ public class ParserRelationSnSpgz {
 
                 //начало парсинга
                 //создаем новый документ
-                relationSnSpgz = new RelationSnSpgz();
-                log.debug("создаем новое соотношение = " + relationSnSpgz);
+                relationKeyWord = new RelationKeyWord();
+                log.debug("создаем новое соотношение = " + relationKeyWord);
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 //проходим по ячейкам строки
@@ -72,7 +68,7 @@ public class ParserRelationSnSpgz {
                     log.debug("cell.getColumnIndex() = " + cell.getColumnIndex());
 
                     //парсим данные, относящиеся ко всему листу
-                    if (idSpgzNum == 0) {
+                    if (keyWordNum == 0) {
 
                         if (cell.getCellType().equals(CellType.STRING)) {
                             log.debug("Тип ячейки String");
@@ -82,26 +78,16 @@ public class ParserRelationSnSpgz {
                                 log.debug("cell.getStringCellValue() " + cell.getStringCellValue() + " num = " + cell.getColumnIndex());
 
                                 ///парсим номера столбцов
-                                if (cell.getStringCellValue().contains("Шифр")) {
-                                    codeWorkNum = cell.getColumnIndex();
-                                    log.debug("codeWorkNum = " + codeWorkNum);
-                                    continue;
-                                }
-                                if (cell.getStringCellValue().contains("работ")) {
-                                    nameWorkNum = cell.getColumnIndex();
-                                    log.debug("nameWorkNum = " + nameWorkNum);
-                                    continue;
-                                }
                                 if (cell.getStringCellValue().contains("СПГЗ")) {
                                     spgzNum = cell.getColumnIndex();
                                     log.debug("spgzNum = " + spgzNum);
                                     continue;
                                 }
-                                if (cell.getStringCellValue().contains("ID")) {
-                                    idSpgzNum = cell.getColumnIndex();
-                                    log.debug("idSpgzNum= " + idSpgzNum);
+                                if (cell.getStringCellValue().contains("Ключевые")) {
+                                    keyWordNum = cell.getColumnIndex();
+                                    log.debug("keyWordNum = " + keyWordNum);
                                     continue;
-                                }else {
+                                } else {
                                     log.debug("break in columnName");
                                     continue;
                                 }
@@ -121,26 +107,6 @@ public class ParserRelationSnSpgz {
                     else {
 
                         int index = cell.getColumnIndex();
-                        //шифр работ
-                        if (index == codeWorkNum) {
-                            if (cell.getCellType().equals(CellType.STRING)) {
-                                try {
-                                    codeWork = cell.getStringCellValue();
-                                    log.debug("codeWork = {}", codeWork);
-                                } catch (Exception ignored) {
-                                }
-                            }
-                        }
-                        //наименование работ
-                        if (index == nameWorkNum) {
-                            if (cell.getCellType().equals(CellType.STRING)) {
-                                try{
-                                    nameWork = cell.getStringCellValue();
-                                    log.debug("nameWork  = {}", nameWork);
-                                }catch (Exception ignored) {
-                                }
-                            }
-                        }
                         //СПГЗ
                         if (index == spgzNum) {
                             if (cell.getCellType().equals(CellType.STRING)) {
@@ -151,12 +117,12 @@ public class ParserRelationSnSpgz {
                                 }
                             }
                         }
-                        //ID СПГЗ
-                        if (index == idSpgzNum) {
+                        //Ключевые слова
+                        if (index == keyWordNum) {
                             if (cell.getCellType().equals(CellType.STRING)) {
                                 try {
-                                    idSpgz = Integer.parseInt(cell.getStringCellValue());
-                                    log.debug("idSpgz = {}", idSpgz);
+                                    keyWord = cell.getStringCellValue();
+                                    log.debug("keyWord = {}", keyWord);
                                 } catch (Exception ignored) {
                                 }
                             }
@@ -164,25 +130,23 @@ public class ParserRelationSnSpgz {
                     }
                 }
             }
-            relationSnSpgz = changeRelationSnSpgz(relationSnSpgz);
+            relationKeyWord = changeRelationSnSpgz(relationKeyWord);
             //добавляем новую запись
-            if (relationSnSpgz.getCodeWork() != null) {
-                log.info("Новое соотношение добавлено = " + relationSnSpgz);
-                spisRelationSnSpgz.add(relationSnSpgz);
+            if (relationKeyWord.getKeyWord() != null) {
+                log.info("Новое соотношение добавлено = " + relationKeyWord);
+                spisRelationKeyWord.add(relationKeyWord);
             }
         }
-        log.info(spisRelationSnSpgz.size());
-        return spisRelationSnSpgz;
+        log.info(spisRelationKeyWord.size());
+        return spisRelationKeyWord;
     }
 
-    private RelationSnSpgz changeRelationSnSpgz(RelationSnSpgz relationSnSpgz){
+    private RelationKeyWord changeRelationSnSpgz(RelationKeyWord relationKeyWord){
         //создаем новую запись
-        if(codeWork != null) relationSnSpgz.setCodeWork(codeWork);
-        if(nameWork != null) relationSnSpgz.setNameWork(nameWork);
-        if(spgz != null) relationSnSpgz.setSpgz(spgz);
-        if(idSpgz != 0) relationSnSpgz.setIdSpgz(idSpgz);
+        if(spgz != null) relationKeyWord.setSpgz(spgz);
+        if(keyWord != null) relationKeyWord.setKeyWord(keyWord);
         //проверяем шаблон
-        log.debug("changeRecord" + relationSnSpgz);
-        return relationSnSpgz;
+        log.debug("changeRecord" + relationKeyWord);
+        return relationKeyWord;
     }
 }

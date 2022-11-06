@@ -26,4 +26,10 @@ public class SampleTzServiceImpl implements SampleTzService {
     public void saveAll(List<SampleTz> sampleTzList) {
         sampleTzRepository.saveAllAndFlush(sampleTzList);
     }
+
+    @Override
+    public SampleTz findAllByIdSpgz(long idSpgz) {
+        SampleTz sampleTz = sampleTzRepository.findAllByIdSpgz(idSpgz);
+        return sampleTz;
+    }
 }

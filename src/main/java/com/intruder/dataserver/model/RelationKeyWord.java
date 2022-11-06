@@ -1,19 +1,22 @@
 package com.intruder.dataserver.model;
 
 
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "references_conformitymodel")
+@Table(name = "references_relationkeywordmodel")
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class RelationSnSpgz {
+public class RelationKeyWord {
 
     /**
      * Id
@@ -23,31 +26,21 @@ public class RelationSnSpgz {
     @Column
     private Long id;
     /**
-     * Шифр работы
+     * Ключевые слова
      */
     @Column
-    private String codeWork;
-    /**
-     * Наименование работы
-     */
-    @Column
-    private String nameWork;
+    private String keyWord;
     /**
      * СПГЗ
      */
     @Column
     private String spgz;
-    /**
-     * ID СПГЗ
-     */
-    @Column
-    private long idSpgz;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        RelationSnSpgz that = (RelationSnSpgz) o;
+        RelationKeyWord that = (RelationKeyWord) o;
         return id != null && Objects.equals(id, that.id);
     }
 

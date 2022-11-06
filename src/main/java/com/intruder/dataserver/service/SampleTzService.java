@@ -16,4 +16,11 @@ public interface SampleTzService {
      * @param sampleTzList- список отношений для сохранения
      */
     void saveAll(List<SampleTz> sampleTzList);
+
+    /**
+     * Поиск шаблона тз по id СПГЗ
+     * @param idSpgz - id СПГЗ для поиска
+     * @return
+     */
+    SampleTz findAllByIdSpgz(long idSpgz);
 }

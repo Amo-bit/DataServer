@@ -1,6 +1,6 @@
 package com.intruder.dataserver.util;
 
-import com.intruder.dataserver.model.Record;
+import com.intruder.dataserver.model.RecordSn;
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -41,8 +41,8 @@ public class ParserSn {
     private double finalSum = 0;
     private double finalSumWithCoefficient= 0;
     ////////////////////////////////////////////
-    public List<Record> parse(InputStream inputStream) {
-        Record record = new Record();
+    public List<RecordSn> parse(InputStream inputStream) {
+        RecordSn record = new RecordSn();
 
         //добавляем переменные с номерами столбцов соответствующих значений
         int subItemNumberNum = 0;
@@ -59,9 +59,9 @@ public class ParserSn {
         /////
         log.debug("создаем список записей по наименованию работ");
         //создаем список записей по наименованию работ
-        List<Record> spisDocForNameWork = new ArrayList<>();
+        List<RecordSn> spisDocForNameWork = new ArrayList<>();
         //создаем общий список работ по разделу
-        List<Record> spisDocForChapter = new ArrayList<>();
+        List<RecordSn> spisDocForChapter = new ArrayList<>();
         log.debug("получаем xssfWorkbook");
         XSSFWorkbook workBook = null;
         try {
@@ -216,14 +216,14 @@ public class ParserSn {
                     log.debug("spisDocForNameWork.size() != 0 " + (spisDocForNameWork.size() != 0));
                     if (flagTotalByName && (difference > 1) && spisDocForNameWork.size() != 0) {
                         totalCostsForTheWorkName = 0;
-                        for (Record spisRecordForNameWork : spisDocForNameWork) {
+                        for (RecordSn spisRecordForNameWork : spisDocForNameWork) {
                             log.debug("флаг расчета затрат по наименованию = " + true);
                             totalCostsForTheWorkName += spisRecordForNameWork.getTotalCostsAtTheCurrentPriceLevel();
                         }
-                        for (Record recordCost : spisDocForNameWork) {
+                        for (RecordSn recordCost : spisDocForNameWork) {
                             recordCost.setTotalCostsForTheWorkName(totalCostsForTheWorkName);
                             spisDocForChapter.add(recordCost);
-                            log.info("controlRecordCost = " + recordCost);
+                            log.debug("controlRecordCost = " + recordCost);
                         }
                         log.debug("spisDocForChapter.size() = " + spisDocForChapter.size());
                         log.debug("spisDocForNameWork.size() = " + spisDocForNameWork.size());
@@ -242,7 +242,7 @@ public class ParserSn {
                                     || record.getCostItem().contains("ЭМ")
                                     || record.getCostItem().contains("ЗПМ")
                                     || record.getCostItem().contains("ЗТР")) {
-                                log.info("Новая запись добавлена = " + record);
+                                log.debug("Новая запись добавлена = " + record);
                                 spisDocForNameWork.add(record);
                                 //флаг парсинга значения суммы по наименованию
                                 flagTotalByName = true;
@@ -255,7 +255,7 @@ public class ParserSn {
                     //начало парсинга
 
                     //создаем новый документ
-                    record = new Record();
+                    record = new RecordSn();
                     log.debug("создаем новый документ = " + record);
                     StringBuilder infoCell = new StringBuilder();
                     ///счетчик значений (первая и вторая сумма в строке)
@@ -541,12 +541,12 @@ public class ParserSn {
         return spisDocForChapter;
     }
 
-    private Record changeRecord(Record record){
+    private RecordSn changeRecord(RecordSn record){
         //создаем новую запись
         if(typeDocument != null) record.setTypeDocument(typeDocument);
         if(addition != null) record.setAddition(addition);
         if(numberDocument != null) record.setNumberDocument(numberDocument);
-        if(dateDocument != null) record.setDateDocument(LocalDate.parse(dateDocument));
+        if(dateDocument != null) record.setDateDocument(dateDocument);
         if(costItem != null) record.setCostItem(costItem);
         if(codeDocument != null) record.setCodeDocument(codeDocument);
         if(subItemNumber != 0) record.setSubItemNumber(subItemNumber);
