@@ -2,8 +2,9 @@ package com.intruder.dataserver.controller;
 
 import com.intruder.dataserver.model.RecordSn;
 import com.intruder.dataserver.model.SampleTz;
-import com.intruder.dataserver.service.SampleTzService;
-import com.intruder.dataserver.util.ParserTz;
+import com.intruder.dataserver.model.SpgzKpgz;
+import com.intruder.dataserver.service.SpgzKpgzService;
+import com.intruder.dataserver.util.ParserSpgzKpgz;
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,40 +24,25 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/v1/load/document/tz")
+@RequestMapping("/api/v1/load/document/kpgz")
 @Log4j2
-public class SampleTzController {
+public class SpgzKpgzController {
 
-    private final SampleTzService sampleTzService;
-    private ParserTz parser = new ParserTz();
+    private final SpgzKpgzService spgzKpgzService;
+    private ParserSpgzKpgz parser = new ParserSpgzKpgz();
 
     @Autowired
-    public SampleTzController(SampleTzService sampleTzService) {
-        this.sampleTzService = sampleTzService;
+    public SpgzKpgzController(SpgzKpgzService spgzKpgzService) {
+        this.spgzKpgzService = spgzKpgzService;
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/")
-    public ResponseEntity<Object> acceptData(HttpServletRequest requestEntity) throws Exception {
-        byte[] processedText = IOUtils.toByteArray(requestEntity.getInputStream());
-        List<SampleTz> list = new ArrayList<>();
-        log.info(processedText.length);
-        list = parser.parse(new ByteArrayInputStream(processedText));
-        for (SampleTz sampleTz : list){
-            System.out.println(sampleTz);
-            sampleTzService.create(sampleTz);
-        }
-
-        return !list.isEmpty()
-                ? new ResponseEntity<>(HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
     @GetMapping(value = "/")
-    public ResponseEntity<List<RecordSn>> create() {
+    public ResponseEntity<List<SpgzKpgz>> create() {
         long start = System.currentTimeMillis();
         FileInputStream inputStream = null;
         try {
             log.info("читаем поток");
-            inputStream = new FileInputStream("C:\\SN\\tz.xlsx");
+            inputStream = new FileInputStream("C:\\SN\\Список СПГЗ 27_5_2022.xlsx");
 
             System.out.println(inputStream);
         } catch (FileNotFoundException e) {
@@ -64,11 +50,11 @@ public class SampleTzController {
             throw new RuntimeException(e);
         }
         log.info("поток прочтен");
-        List<SampleTz> list = new ArrayList<>();
+        List<SpgzKpgz> list = new ArrayList<>();
 
         list = parser.parse(inputStream);
         //System.out.println("list " + list);
-        sampleTzService.saveAll(list);
+        spgzKpgzService.saveAll(list);
         /*for (SampleTz sampleTz : list){
             //System.out.println(sampleTz);
             sampleTzService.create(sampleTz);

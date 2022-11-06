@@ -23,7 +23,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/key")
+@RequestMapping("/api/v1/load/document/key")
 @Log4j2
 public class RelationKeyWordController {
     @Autowired

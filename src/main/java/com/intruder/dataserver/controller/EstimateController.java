@@ -47,34 +47,33 @@ public class EstimateController {
 
         List<Estimate> list = new ArrayList<>();
         list = parser.parse(uploadFile.getInputStream());
+        if(list != null) log.debug("parse OK");
         SearchSpgz searchSpgz = new SearchSpgz(relationKeyWordService);
-        StringBuilder beforeNameWork = new StringBuilder();
 
         List<RelationKeyWord> relationKeyWordList = relationKeyWordService.findALL();
+        if(relationKeyWordList != null) log.debug("key list is load");
 
-        list.forEach(f -> {
+        int beforeId = 0;
+        for(Estimate estimate : list){
 
-            if(!beforeNameWork.toString().equals(f.getNameWorksAndCosts())){
-                spgz = searchSpgz.findSpgz(f.getNameWorksAndCosts(), relationKeyWordList);
-                beforeNameWork.setLength(0);
-                beforeNameWork.append(f.getNameWorksAndCosts());
-                sampleTzList = sampleTzService.findAllBySpgzContains(spgz);
+            if(beforeId != estimate.getSubItemNumber()){
+                spgz = searchSpgz.findSpgz(estimate.getNameWorksAndCosts(), relationKeyWordList);
+                beforeId = estimate.getSubItemNumber();
+                if(spgz != null) sampleTzList = sampleTzService.findAllBySpgzContains(spgz);
 
-                f.setIdSubChapter((int) sampleTzList.get(0).getIdSpgz());
-                log.debug("запись после полной обработки = " + f);
+                estimate.setIdSubChapter((int) sampleTzList.get(0).getIdSpgz());
+                log.debug("запись после полной обработки = " + estimate);
             }else {
-                f.setIdSubChapter((int) sampleTzList.get(0).getIdSpgz());
+                estimate.setIdSubChapter((int) sampleTzList.get(0).getIdSpgz());
             }
 
             log.debug("spgz = " + spgz);
-            log.debug("f.getNameWorksAndCosts() = " + f.getNameWorksAndCosts());
-
-
-        });
+            log.debug("f.getNameWorksAndCosts() = " + estimate.getNameWorksAndCosts());
+        }
 
         ////////////////////
         estimateService.saveAll(list);
-
+        log.info("файл загружен в базу данных = " + uploadFile.getOriginalFilename());
 
         return !list.isEmpty()
                 ? new ResponseEntity<>(HttpStatus.OK)

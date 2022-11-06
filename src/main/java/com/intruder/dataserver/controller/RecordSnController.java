@@ -14,8 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,50 +39,40 @@ public class RecordSnController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/")
 
-    public @ResponseBody ResponseEntity<?> acceptData(@RequestParam("file") MultipartFile uploadFile) throws Exception {
+    public @ResponseBody ResponseEntity<?> acceptData(@RequestParam("file") MultipartFile uploadFile, @RequestParam("id") int id) throws Exception {
 
         List<RecordSn> list = new ArrayList<>();
         list = parser.parse(uploadFile.getInputStream());
         SearchSpgz searchSpgz = new SearchSpgz(relationKeyWordService);
-        StringBuilder beforeNameWork = new StringBuilder();
 
         List<RelationKeyWord> relationKeyWordList = relationKeyWordService.findALL();
+        int beforeId = 0;
+        for(RecordSn recordSn : list) {
+            recordSn.setDocumentId(id);
+            //recordSn.setTypeDocument("СН-2012");
 
-        list.forEach(f -> {
-            f.setDocumentId(11);
-            f.setTypeDocument("СН-2012");
-            if(beforeNameWork.toString().equals(f.getNameWorksAndCosts())){
-                f.setIdSubChapter((int) sampleTzList.get(0).getIdSpgz());
+            if(beforeId == recordSn.getSubItemNumber()){
+                recordSn.setIdSubChapter((int) sampleTzList.get(0).getIdSpgz());
             }else {
-                spgz = searchSpgz.findSpgz(f.getNameWorksAndCosts(), relationKeyWordList);
-                beforeNameWork.setLength(0);
-                beforeNameWork.append(f.getNameWorksAndCosts());
+                spgz = searchSpgz.findSpgz(recordSn.getNameWorksAndCosts(), relationKeyWordList);
+                beforeId = recordSn.getSubItemNumber();
                 sampleTzList = sampleTzService.findAllBySpgzContains(spgz);
 
-                f.setIdSubChapter((int) sampleTzList.get(0).getIdSpgz());
-                log.info("запись после полной обработки = " + f);
+                recordSn.setIdSubChapter((int) sampleTzList.get(0).getIdSpgz());
+                log.info("запись после полной обработки = " + recordSn );
             }
 
             log.debug("spgz = " + spgz);
-            log.debug("f.getNameWorksAndCosts() = " + f.getNameWorksAndCosts());
-
-
-        });
+            log.debug("f.getNameWorksAndCosts() = " + recordSn.getNameWorksAndCosts());
+        }
 
         ////////////////////
         recordService.saveAll(list);
+        log.info("файл загружен в базу данных = " + uploadFile.getOriginalFilename());
 
 
         return !list.isEmpty()
                 ? new ResponseEntity<>(HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    private String findKeyWord(String nameWork){
-        StringBuilder keyWord = new StringBuilder();
-        keyWord.append(nameWork.substring(0, nameWork.indexOf(" ") + 1));
-        keyWord.append(nameWork.substring(nameWork.indexOf(" ") + 1)
-                .substring(0, nameWork.substring(nameWork.indexOf(" ") + 1).indexOf(" ") - 3));
-        return keyWord.toString();
     }
 }
