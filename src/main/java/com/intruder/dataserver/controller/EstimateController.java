@@ -1,11 +1,13 @@
 package com.intruder.dataserver.controller;
 
+import com.intruder.dataserver.model.Estimate;
 import com.intruder.dataserver.model.RecordSn;
 import com.intruder.dataserver.model.RelationKeyWord;
 import com.intruder.dataserver.model.SampleTz;
-import com.intruder.dataserver.service.RecordSnService;
+import com.intruder.dataserver.service.EstimateService;
 import com.intruder.dataserver.service.RelationKeyWordService;
 import com.intruder.dataserver.service.SampleTzService;
+import com.intruder.dataserver.util.ParserEstimate;
 import com.intruder.dataserver.util.ParserSn;
 import com.intruder.dataserver.util.SearchSpgz;
 import lombok.extern.log4j.Log4j2;
@@ -21,29 +23,29 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/v1/load/document")
+@RequestMapping("/api/v1/load/estimate")
 @Log4j2
-public class RecordSnController {
+public class EstimateController {
 
-    private final RecordSnService recordService;
+    private final EstimateService estimateService;
     private final RelationKeyWordService relationKeyWordService;
     private final SampleTzService sampleTzService;
-    ParserSn parser = new ParserSn();
+    ParserEstimate parser = new ParserEstimate();
     private String spgz = null;
     private List<SampleTz> sampleTzList;
 
-
-    public RecordSnController(RecordSnService recordService, RelationKeyWordService relationKeyWordService, SampleTzService sampleTzService) {
-        this.recordService = recordService;
+    public EstimateController(EstimateService estimateService, RelationKeyWordService relationKeyWordService, SampleTzService sampleTzService) {
+        this.estimateService = estimateService;
         this.relationKeyWordService = relationKeyWordService;
         this.sampleTzService = sampleTzService;
     }
+
 
     @RequestMapping(method = RequestMethod.POST, value = "/")
 
     public @ResponseBody ResponseEntity<?> acceptData(@RequestParam("file") MultipartFile uploadFile) throws Exception {
 
-        List<RecordSn> list = new ArrayList<>();
+        List<Estimate> list = new ArrayList<>();
         list = parser.parse(uploadFile.getInputStream());
         SearchSpgz searchSpgz = new SearchSpgz(relationKeyWordService);
         StringBuilder beforeNameWork = new StringBuilder();
@@ -51,18 +53,17 @@ public class RecordSnController {
         List<RelationKeyWord> relationKeyWordList = relationKeyWordService.findALL();
 
         list.forEach(f -> {
-            f.setDocumentId(11);
-            f.setTypeDocument("СН-2012");
-            if(beforeNameWork.toString().equals(f.getNameWorksAndCosts())){
-                f.setIdSubChapter((int) sampleTzList.get(0).getIdSpgz());
-            }else {
+
+            if(!beforeNameWork.toString().equals(f.getNameWorksAndCosts())){
                 spgz = searchSpgz.findSpgz(f.getNameWorksAndCosts(), relationKeyWordList);
                 beforeNameWork.setLength(0);
                 beforeNameWork.append(f.getNameWorksAndCosts());
                 sampleTzList = sampleTzService.findAllBySpgzContains(spgz);
 
                 f.setIdSubChapter((int) sampleTzList.get(0).getIdSpgz());
-                log.info("запись после полной обработки = " + f);
+                log.debug("запись после полной обработки = " + f);
+            }else {
+                f.setIdSubChapter((int) sampleTzList.get(0).getIdSpgz());
             }
 
             log.debug("spgz = " + spgz);
@@ -72,7 +73,7 @@ public class RecordSnController {
         });
 
         ////////////////////
-        recordService.saveAll(list);
+        estimateService.saveAll(list);
 
 
         return !list.isEmpty()

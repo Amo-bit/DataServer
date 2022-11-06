@@ -15,9 +15,8 @@ public class SearchSpgz {
         this.relationKeyWordService = relationKeyWordService;
     }
 
-    public String findSpgz(String workName){
+    public String findSpgz(String workName, List<RelationKeyWord> relationKeyWordList){
         log.debug("workName for search = " + workName);
-        List<RelationKeyWord> relationKeyWordList = relationKeyWordService.findALL();
         //счетчик совпадений ключевых слов предыдущего спгз
         int iterKeyBefore = 0;
         //счетчик совпадение текущего спгз

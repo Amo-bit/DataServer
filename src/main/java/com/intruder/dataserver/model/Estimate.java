@@ -10,12 +10,12 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "references_referencesmodel")
+@Table(name = "references_estimatemodel")
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class RecordSn {
+public class Estimate {
 
     /**
      * ID записи
@@ -24,11 +24,6 @@ public class RecordSn {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private Long id;
-    /**
-     * ID документа
-     */
-    @Column
-    private int documentId;
     /**
      * № п/п
      */
@@ -155,8 +150,8 @@ public class RecordSn {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        RecordSn record = (RecordSn) o;
-        return id != null && Objects.equals(id, record.id);
+        Estimate estimate = (Estimate) o;
+        return id != null && Objects.equals(id, estimate.id);
     }
 
     @Override

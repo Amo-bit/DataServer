@@ -1,7 +1,6 @@
 package com.intruder.dataserver.service;
 
 import com.intruder.dataserver.model.RecordSn;
-import com.intruder.dataserver.model.RelationSnSpgz;
 
 import java.util.List;
 
