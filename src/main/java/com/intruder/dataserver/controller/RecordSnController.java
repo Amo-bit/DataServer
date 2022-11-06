@@ -1,10 +1,13 @@
 package com.intruder.dataserver.controller;
 
 import com.intruder.dataserver.model.RecordSn;
-import com.intruder.dataserver.model.RelationSnSpgz;
+import com.intruder.dataserver.model.SampleTz;
 import com.intruder.dataserver.service.RecordSnService;
+import com.intruder.dataserver.service.RelationKeyWordService;
 import com.intruder.dataserver.service.RelationSnSpgzService;
+import com.intruder.dataserver.service.SampleTzService;
 import com.intruder.dataserver.util.ParserSn;
+import com.intruder.dataserver.util.SearchSpgz;
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.util.IOUtils;
 import org.springframework.http.HttpStatus;
@@ -26,12 +29,16 @@ public class RecordSnController {
 
     private final RecordSnService recordService;
     private final RelationSnSpgzService relationSnSpgzService;
+    private final RelationKeyWordService relationKeyWordService;
+    private final SampleTzService sampleTzService;
     ParserSn parser = new ParserSn();
 
 
-    public RecordSnController(RecordSnService recordService, RelationSnSpgzService relationSnSpgzService) {
+    public RecordSnController(RecordSnService recordService, RelationSnSpgzService relationSnSpgzService, RelationKeyWordService relationKeyWordService, SampleTzService sampleTzService) {
         this.recordService = recordService;
         this.relationSnSpgzService = relationSnSpgzService;
+        this.relationKeyWordService = relationKeyWordService;
+        this.sampleTzService = sampleTzService;
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/")
@@ -49,13 +56,15 @@ public class RecordSnController {
                 ? new ResponseEntity<>(HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+    String spgz = null;
+    List<SampleTz> sampleTzList;
     @GetMapping(value = "/")
     public ResponseEntity<List<RecordSn>> create() {
         //long start = System.currentTimeMillis();
         FileInputStream inputStream = null;
         try {
             log.info("читаем поток");
-            inputStream = new FileInputStream("C:\\SN\\sn\\Глава 1. Здания.xlsx");
+            inputStream = new FileInputStream("C:\\SN\\example.xlsx");
 
             System.out.println(inputStream);
         } catch (FileNotFoundException e) {
@@ -64,40 +73,28 @@ public class RecordSnController {
         }
         log.info("поток прочтен");
         List<RecordSn> list = new ArrayList<>();
-
+        SearchSpgz searchSpgz = new SearchSpgz(relationKeyWordService);
+        StringBuilder beforeNameWork = new StringBuilder();
         list = parser.parse(inputStream);
-        list.forEach(f -> {f.setDocumentId(6);});
 
-        //добавление спгз и пгз
-        /*list.forEach(f -> {
-            RelationSnSpgz relationSnSpgz = new RelationSnSpgz();
-            try {
-                relationSnSpgz = relationSnSpgzService.findAllByCodeWork(f.getCodeDocument());
-                log.info("f.getCodeDocument() = " + f.getCodeDocument());
-                log.info(relationSnSpgz);
-            }catch (Exception ignored){}
-            try{
-                if(relationSnSpgz == null) {
-                    String keyWord = findKeyWord(f.getNameWorksAndCosts());
-                    log.info("keuWord = " + keyWord);
-                    List<RelationSnSpgz> relationSnSpgzList = relationSnSpgzService.findALLByNameWorkContains(keyWord);
-                    relationSnSpgz = relationSnSpgzList.get(0);
-                    log.info("relationSnSpgzList.get(0) = " + relationSnSpgzList.get(0));
-                }
-            }catch (Exception ex){}
+        list.forEach(f -> {
+            f.setDocumentId(1);
+            if(beforeNameWork.toString().equals(f.getNameWorksAndCosts())){
 
-            if(relationSnSpgz != null){
-                if(relationSnSpgz.getIdSpgz() != 0) {
-                    f.setIdSubChapter((int)relationSnSpgz.getIdSpgz());
-                }else{
-                    String codeWork = relationSnSpgz.getSpgz().substring(relationSnSpgz.getSpgz().indexOf(" к ") + 1);
-                    long idSubchapter = relationSnSpgzService.findIdSpgzByCodeWork(codeWork);
-                    f.setIdSubChapter((int)idSubchapter);
-                }
+            }else {
+                spgz = searchSpgz.findSpgz(f.getNameWorksAndCosts());
+                beforeNameWork.setLength(0);
+                beforeNameWork.append(f.getNameWorksAndCosts());
+                sampleTzList = sampleTzService.findAllBySpgzContains(spgz);
             }
 
+            System.out.println("spgz = " + spgz);
+            System.out.println("f.getNameWorksAndCosts() = " + f.getNameWorksAndCosts());
 
-        });*/
+            f.setIdSubChapter((int) sampleTzList.get(0).getIdSpgz());
+            System.out.println("запись после полной обработки = " + f);
+        });
+
         ////////////////////
         recordService.saveAll(list);
         //list.forEach(System.out::println);

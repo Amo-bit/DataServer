@@ -29,7 +29,11 @@ public class SampleTzServiceImpl implements SampleTzService {
 
     @Override
     public SampleTz findAllByIdSpgz(long idSpgz) {
-        SampleTz sampleTz = sampleTzRepository.findAllByIdSpgz(idSpgz);
-        return sampleTz;
+        return sampleTzRepository.findAllByIdSpgz(idSpgz);
+    }
+
+    @Override
+    public List<SampleTz> findAllBySpgzContains(String spgz) {
+        return sampleTzRepository.findAllBySpgzContains(spgz);
     }
 }

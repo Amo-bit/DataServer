@@ -2,9 +2,11 @@ package com.intruder.dataserver.util;
 
 import com.intruder.dataserver.model.RelationKeyWord;
 import com.intruder.dataserver.service.RelationKeyWordService;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
 
+@Log4j2
 public class SearchSpgz {
 
     private final RelationKeyWordService relationKeyWordService;
@@ -13,7 +15,8 @@ public class SearchSpgz {
         this.relationKeyWordService = relationKeyWordService;
     }
 
-    String findSpgz(String workName){
+    public String findSpgz(String workName){
+        log.debug("workName for search = " + workName);
         List<RelationKeyWord> relationKeyWordList = relationKeyWordService.findALL();
         //счетчик совпадений ключевых слов предыдущего спгз
         int iterKeyBefore = 0;
@@ -26,20 +29,45 @@ public class SearchSpgz {
         //подходящий спгз
         StringBuilder spgz = new StringBuilder();
         for(RelationKeyWord relationKeyWord : relationKeyWordList){
-            iterKey = iterKeyBefore;
+
+            iterKey = 0;
             spisKeyWord.append(relationKeyWord.getKeyWord());
-            while(spisKeyWord.toString().contains("*")){
-                iterKey = 0;
+            log.debug("spisKeyWord = " + spisKeyWord);
+            while(spisKeyWord.toString().contains("*") && spisKeyWord.length() > 2){
+
+                keyword.setLength(0);
                 keyword.append(spisKeyWord.toString().substring(0, spisKeyWord.toString().indexOf("*")));
-                spisKeyWord.delete(0, spisKeyWord.toString().indexOf("*") + 2);
-                if(spisKeyWord.substring(0,1).equals(" ")){
-                    spisKeyWord.delete(0,1);
+                //log.debug("keyword = " + keyword);
+                spisKeyWord.delete(0, spisKeyWord.toString().indexOf("*") + 1);
+                if(spisKeyWord.length() > 2){
+                    if(spisKeyWord.substring(0,2).equals(" ")) {
+                        spisKeyWord.delete(0, spisKeyWord.toString().indexOf(" ") + 1);
+                    }
                 }
+                log.debug("workNameForControl = "  + workName);
+                log.debug("keyWord for control = " + keyword);
                 if(workName.contains(keyword.toString())){
                     iterKey++;
                 }
+                if(spisKeyWord.length() == 0) {
+                    continue;
+                }
             }
+            log.debug("iterKey = " + iterKey);
+            log.debug("iterKeyBefore = " + iterKeyBefore);
+            if(iterKey > iterKeyBefore) {
+                iterKeyBefore = iterKey;
+                if(relationKeyWord.getSpgz().contains(",")){
+                    spgz.setLength(0);
+                    spgz.append(relationKeyWord.getSpgz().substring(0, relationKeyWord.getSpgz().indexOf(",")));
+                }else{
+                    spgz.setLength(0);
+                    spgz.append(relationKeyWord.getSpgz());
+                }
+            }
+
         }
-        return null;
+        log.debug("конечный spgz = " + spgz);
+        return spgz.toString();
     }
 }

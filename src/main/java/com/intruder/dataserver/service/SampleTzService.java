@@ -23,4 +23,11 @@ public interface SampleTzService {
      * @return
      */
     SampleTz findAllByIdSpgz(long idSpgz);
+
+    /**
+     * Поиск спгз и пгз по наименованию спгз
+     * @param spgz
+     * @return
+     */
+    List<SampleTz> findAllBySpgzContains(String spgz);
 }
